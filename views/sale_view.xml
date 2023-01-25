@@ -10,7 +10,7 @@
             	<field name="payment_term_id" position="after">
             		<field name="sale_manual_currency_rate_active" attrs="{'readonly':[('state','in',['sale','done','cancel'])]}"/>
             		<field name="sale_manual_currency_rate" attrs="{'invisible': [('sale_manual_currency_rate_active', '=', False)],'required':[('sale_manual_currency_rate_active', '=', True)],'readonly':[('state','in',['sale','done','cancel'])]}"/>
-            	</field>
+                </field>
             </field>
         </record>
 

@@ -9,7 +9,6 @@ class SaleOrder(models.Model):
     sale_manual_currency_rate_active = fields.Boolean('Apply Manual Exchange')
     sale_manual_currency_rate = fields.Float('Rate', digits=(12, 6))
 
-
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
@@ -51,7 +50,7 @@ class SaleOrderLine(models.Model):
         if product.description_sale:
             name += '\n' + product.description_sale
         vals['name'] = name
-        
+
         self._compute_tax_id()
         price_unit = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product),
                                                                                      product.taxes_id, self.tax_id,

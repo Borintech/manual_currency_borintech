@@ -9,6 +9,8 @@
                   <field name="journal_id" position="after">
                         <field name="manual_currency_rate_active" attrs="{'readonly':[('state','in',['posted','cancel'])]}"/>
                         <field name="manual_currency_rate" attrs="{'invisible': [('manual_currency_rate_active', '=', False)],'required':[('manual_currency_rate_active', '=', True)],'readonly':[('state','in',['posted','cancel'])]}"/>
+            		<field name="sale_manual_currency_rate_auto" attrs="{'invisible': [('manual_currency_rate_active', '=', False)],'required':[('manual_currency_rate_active', '=', True)],'readonly':[('state','in',['posted','cancel'])]}"/>
+
                   </field>
             </field>
             </record>
