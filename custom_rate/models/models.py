@@ -19,7 +19,7 @@ class AccountMove(models.Model):
 
     def _check_balanced(self):
             for rec in self:
-                if rec.move_type == 'in_invoice' or rec.move_type == 'in_refund':
+                if rec.type == 'in_invoice' or rec.type == 'in_refund':
                     if rec.es_manual_rate==True:
                             return True
             res = super(AccountMove, self)._check_balanced()

@@ -100,9 +100,12 @@ class account_invoice(models.Model):
 			if rec.sale_manual_currency_rate_auto:
 				manual_currency_rate = rec.invoice_line_ids.price_unit * rec.manual_currency_rate
 				rec.invoice_line_ids.price_unit = manual_currency_rate
-				rec.invoice_line_ids.price_subtotal = manual_currency_rate
 				rec.amount_untaxed = manual_currency_rate
-				rec.amount_total = rec.amount_untaxed + rec.amount_by_group[0][1]
+				impuesto = rec.invoice_line_ids.tax_ids.amount / 100 + 1
+				rec.amount_total = rec.amount_untaxed * impuesto
+
+
+
 		self.sale_manual_currency_rate_auto = False
 
 		if len(self) == 1:
