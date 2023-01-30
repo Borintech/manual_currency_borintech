@@ -86,6 +86,9 @@ class account_invoice(models.Model):
 	@api.onchange('sale_manual_currency_rate_auto')
 	def auto_price_unit(self):
 		for rec in self:
+			if not rec.invoice_line_ids.product_id or rec.invoice_line_ids.display_type in ('line_section', 'line_note'):
+				continue
+
 			rec.invoice_line_ids.name = rec.invoice_line_ids._get_computed_name()
 			rec.invoice_line_ids.account_id = rec.invoice_line_ids._get_computed_account()
 			rec.invoice_line_ids.tax_ids = rec.invoice_line_ids._get_computed_taxes()
