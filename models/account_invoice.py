@@ -79,8 +79,32 @@ class account_invoice(models.Model):
 	
 	manual_currency_rate_active = fields.Boolean('Apply Manual Exchange')
 	manual_currency_rate = fields.Float('Rate', digits=(12, 6))
+	sale_manual_currency_rate_auto = fields.Boolean('Update', default=False)
 
- 
+	##Prueba
+
+	@api.onchange('sale_manual_currency_rate_auto')
+	def auto_price_unit(self):
+		for rec in self:
+			rec.invoice_line_ids.name = rec.invoice_line_ids._get_computed_name()
+			rec.invoice_line_ids.account_id = rec.invoice_line_ids._get_computed_account()
+			rec.invoice_line_ids.tax_ids = rec.invoice_line_ids._get_computed_taxes()
+			rec.invoice_line_ids.product_uom_id = rec.invoice_line_ids._get_computed_uom()
+			rec.invoice_line_ids.price_unit = rec.invoice_line_ids._get_computed_price_unit()
+			rec.invoice_line_ids._onchange_uom_id()
+			rec.invoice_line_ids._get_price_total_and_subtotal()
+			rec.invoice_line_ids.move_id._compute_amount()
+			if rec.sale_manual_currency_rate_auto:
+				manual_currency_rate = rec.invoice_line_ids.price_unit * rec.manual_currency_rate
+				rec.invoice_line_ids.price_unit = manual_currency_rate
+				rec.invoice_line_ids.price_subtotal = manual_currency_rate
+				rec.amount_untaxed = manual_currency_rate
+				rec.amount_total = rec.amount_untaxed + rec.amount_by_group[0][1]
+		self.sale_manual_currency_rate_auto = False
+
+		if len(self) == 1:
+			return {'domain': {'product_uom_id': [('category_id', '=', self.invoice_line_ids.product_uom_id.category_id.id)]}}
+
 
 class stock_move(models.Model):
 	_inherit = 'stock.move'
