@@ -81,6 +81,8 @@ class account_invoice(models.Model):
 	manual_currency_rate = fields.Float('Rate', digits=(12, 6))
 	sale_manual_currency_rate_auto = fields.Boolean('Update', default=False)
 
+	##Prueba
+
 	@api.onchange('sale_manual_currency_rate_auto')
 	def auto_price_unit(self):
 		for rec in self:
