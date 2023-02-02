@@ -8,6 +8,7 @@
          <xpath expr="//field[@name='currency_id']"  position="after">
             <field name="es_manual_rate" attrs="{'invisible': [('currency_id', 'in', (19))]}"/>
             <field name="currency_rate" attrs="{'invisible': [('currency_id', 'in', (19))]}"/>
+             <button name="auto_update" type="object" string="Actualizar" attrs="{'invisible': [('currency_id', 'in', (19))]}"/>
         </xpath>
       </field>
     </record>
