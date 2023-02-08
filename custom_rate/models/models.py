@@ -30,39 +30,50 @@ class AccountMove(models.Model):
     currency_rate = fields.Float(string='Tasa de cambio', readonly=False, compute='_get_currency_rate', store=True)
     es_manual_rate = fields.Boolean(string='Usar TC manual')
 
+
+
     def auto_update(self):
         for rec in self:
             if rec.es_manual_rate:
                 for line in rec.line_ids:
 
-                    company_currency = line.account_id.company_id.currency_id
-                    balance = line.amount_currency
-                    debe = 0
-                    haber = 0
-                    if line.currency_id and company_currency and line.currency_id != company_currency:
-                        if line.move_id.purchase_currency_rate > 0:
+                    precio_venta = line.credit
+                    precio_deudores = line.debit
 
-                            debe = balance * rec.currency_rate
+                    if line.name == rec.invoice_line_ids.name:
+                        precio_venta = 0
+                        precio_venta = line.amount_currency * rec.currency_rate
+                        precio_venta = precio_venta * -1
+                        if line.tax_ids.amount != 0:
+                            precio_venta = precio_venta * line.tax_ids.amount / 100
 
-                            if line.tax_ids.amount != 0:
-                                debe = debe * line.tax_ids.amount / 100
+                        #TODO AGREGAR PRECIO A LINEA CREDIT
 
-                            debe = line.currency_id._convert(debe, company_currency, line.account_id.company_id,
-                                                                line.move_id.date or fields.Date.today(), True,
-                                                                line.move_id.purchase_currency_rate)
-                        else:
 
-                            haber = balance * rec.currency_rate
+                    if line.name == False:
+                        precio_deudores = 0
+                        precio_deudores = line.amount_currency * rec.currency_rate
 
-                            if line.tax_ids.amount != 0:
-                                haber = haber * line.tax_ids.amount / 100
+                        if line.tax_ids.amount != 0:
+                            precio_deudores = precio_deudores * line.tax_ids.amount / 100
 
-                            haber = line.currency_id._convert(debe, company_currency, line.account_id.company_id,
-                                                                line.move_id.date or fields.Date.today(), True,
-                                                                line.move_id.purchase_currency_rate)
 
-                        line.debit = debe > 0 and debe or 0.0
-                        line.credit = haber < 0 and -haber or 0.0
+
+                    #WRITE
+                    # rec.line_ids.write({
+                    #     'credit': precio_venta,
+                    #     'debit': precio_deudores
+                    # })
+
+
+                    #UPDATE
+                    # rec.line_ids.update({
+                    #     'credit': precio_venta,
+                    #     'debit': precio_deudores
+                    # })
+
+
+
 
                     # if line.amount_currency < 0:
                     #     importe_moneda = line.amount_currency * -1
@@ -70,12 +81,20 @@ class AccountMove(models.Model):
                     #     if line.tax_ids.amount != 0:
                     #         haber = haber * line.tax_ids.amount / 100
                     #
-                    #     line.credit = haber
-                    #
                     # else:
+                    #     debe += haber
                     #     importe_moneda = line.amount_currency
                     #     debe = importe_moneda * rec.currency_rate
                     #     if line.tax_ids.amount != 0:
                     #         debe = debe * line.tax_ids.amount / 100
-                    #
-                    #     line.debit = debe
+
+
+                    # rec.line_ids.write({
+                    #     'credit': haber,
+                    #     'debit': debe
+                    # })
+
+                    # rec.line_ids.update({
+                    #     'credit': haber,
+                    #     'debit': debe
+                    # })
