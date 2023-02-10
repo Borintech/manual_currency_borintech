@@ -35,6 +35,7 @@ class AccountMove(models.Model):
     def auto_update(self):
         for rec in self:
             if rec.es_manual_rate:
+
                 for line in rec.line_ids:
 
                     precio_venta = line.credit
@@ -58,9 +59,17 @@ class AccountMove(models.Model):
                             precio_deudores = precio_deudores * line.tax_ids.amount / 100
 
 
+                    line.with_context(check_move_validity=False).write({
+                        'credit': precio_venta,
+                        'debit': precio_deudores
+                    })
+
+
+
+                    #res = super(AccountMove, self.with_context(check_move_validity=False)).write(vals)
 
                     #WRITE
-                    # rec.line_ids.write({
+                    # rec.line_ids.with_context(check_move_validity=False).write({
                     #     'credit': precio_venta,
                     #     'debit': precio_deudores
                     # })
