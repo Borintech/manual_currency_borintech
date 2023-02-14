@@ -30,8 +30,11 @@ class AccountMove(models.Model):
     currency_rate = fields.Float(string='Tasa de cambio', readonly=False, compute='_get_currency_rate', store=True)
     es_manual_rate = fields.Boolean(string='Usar TC manual')
 
+
+
     def auto_update(self):
         for rec in self:
+            rec.l10n_ar_currency_rate = rec.currency_rate
             if rec.es_manual_rate:
                 for line in rec.line_ids:
 
