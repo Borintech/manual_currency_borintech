@@ -17,7 +17,7 @@
     # for the full list
     'category': 'Uncategorized',
     'sequence': -2,
-    'version': '0.1',
+    'version': '0.5',
 
     # any module necessary for this one to work correctly
     'depends': ['l10n_latam_invoice_document',
