@@ -7,7 +7,7 @@
       <field name="arch" type="xml">
          <xpath expr="//field[@name='currency_id']"  position="after">
             <field name="es_manual_rate" attrs="{'invisible': [('currency_id', 'in', (19))]}"/>
-            <field name="currency_rate" attrs="{'invisible': [('currency_id', 'in', (19))], 'readonly' : ['|',('state','=','posted'),('state','=','cancel')]}" force_save="1" />
+            <field name="currency_rate" attrs="{'invisible': [('currency_id', 'in', (19))], 'readonly' : ['|',('state','=','posted'),('state','=','cancel')]}" force_save="1" digits="[12,6]"/>
              <button name="auto_update" type="object" string="Actualizar" attrs="{'invisible': [('currency_id', 'in', (19))]}"/>
         </xpath>
       </field>
