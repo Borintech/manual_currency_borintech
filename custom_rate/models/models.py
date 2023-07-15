@@ -16,6 +16,7 @@
 #
 ##############################################################################
 from odoo import api, fields, models, SUPERUSER_ID
+import math
 
 
 class AccountMove(models.Model):
@@ -81,7 +82,6 @@ class AccountMove(models.Model):
             if rec.es_manual_rate:
                 rec.l10n_ar_currency_rate = rec.currency_rate
                 for line in rec.line_ids:
-
                     precio_credit = line.credit
                     precio_debit = line.debit
 
@@ -89,16 +89,42 @@ class AccountMove(models.Model):
                         precio_credit = 0
                         precio_credit = line.amount_currency * rec.currency_rate
                         precio_credit = precio_credit * -1
+                        limitado = "{:.2f}".format(precio_credit)
+                        print("precio credit", precio_credit)
+                        print("precio credit", limitado)
 
                     else:
                         precio_debit = 0
                         precio_debit = line.amount_currency * rec.currency_rate
+                        limitado_debit = "{:.2f}".format(precio_debit)
+                        print("precio debit", precio_debit)
+                        print("precio credit", limitado_debit)
 
                     line.with_context(check_move_validity=False).write({
                         'credit': precio_credit,
                         'debit': precio_debit
                     })
+        # llamo a funcion de ajuste de centavos
+        rec.adjust_journal_entries()
 
+    def adjust_journal_entries(move):
+        total_debit = sum(line.debit for line in move.line_ids)
+        total_credit = sum(line.credit for line in move.line_ids)
+
+        difference = total_credit - total_debit
+
+        if difference != 0:
+            if difference > 0:
+                # Agrego un débito adicional para equilibrar
+                debit_account = \
+                    move.line_ids.filtered(lambda line: line.debit > 0).sorted(key=lambda line: line.debit)[1]
+                debit_account.write({'debit': debit_account.debit + difference})
+            else:
+                # Agrego un crédito adicional para equilibrar
+                credit_account = \
+                    move.line_ids.filtered(lambda line: line.credit > 0).sorted(key=lambda line: line.credit)[1]
+                credit_account.write({'credit': credit_account.credit + abs(difference)})
+        return move
 
     def post(self):
         for rec in self:
@@ -118,12 +144,34 @@ class AccountMove(models.Model):
                     # si no tiene fecha en realidad en llamando a super ya se recomputa con el llamado a _onchange_invoice_date
                     # también se recomputa con algo de lock dates llamando a _onchange_invoice_date, pero por si no se dan
                     # esas condiciones o si odoo las cambia, llamamos al onchange_currency por las dudas
-                    record.with_context(check_move_validity=False, force_rate=rec.l10n_ar_currency_rate)._onchange_currency()
+                    record.with_context(check_move_validity=False,
+                                        force_rate=rec.l10n_ar_currency_rate)._onchange_currency()
 
                     # tambien tenemos que pasar force_rate aca por las dudas de que super entre en onchange_currency en los
                     # mismos casos mencionados recien
                     res = super(AccountMove, record.with_context(force_rate=rec.l10n_ar_currency_rate)).post()
                 res = super(AccountMove, self - other_curr_ar_invoices).post()
                 return res
+            else:
+                """ recompute debit/credit sending force_rate on context """
+                other_curr_ar_invoices = self.filtered(
+                    lambda x: x.is_invoice() and
+                              x.company_id.country_id == self.env.ref(
+                        'base.ar') and x.currency_id != x.company_id.currency_id)
+                # llamamos a todos los casos de otra moneda y no solo a los que tienen "l10n_ar_currency_rate" porque odoo
+                # tiene una suerte de bug donde solo recomputa los debitos/creditos en ciertas condiciones, pero puede
+                # ser que esas condiciones no se cumplan y la cotizacion haya cambiado (por ejemplo la factura tiene fecha y
+                # luego se cambia la cotizacion, al validar no se recomputa). Si odoo recomputase en todos los casos seria
+                # solo necesario iterar los elementos con l10n_ar_currency_rate y hacer solo el llamado a super
+                for record in other_curr_ar_invoices:
+                    # si no tiene fecha en realidad en llamando a super ya se recomputa con el llamado a _onchange_invoice_date
+                    # también se recomputa con algo de lock dates llamando a _onchange_invoice_date, pero por si no se dan
+                    # esas condiciones o si odoo las cambia, llamamos al onchange_currency por las dudas
+                    record.with_context(check_move_validity=False,
+                                        force_rate=record.l10n_ar_currency_rate)._onchange_currency()
 
-
+                    # tambien tenemos que pasar force_rate aca por las dudas de que super entre en onchange_currency en los
+                    # mismos casos mencionados recien
+                    res = super(AccountMove, record.with_context(force_rate=record.l10n_ar_currency_rate)).post()
+                res = super(AccountMove, self - other_curr_ar_invoices).post()
+                return res
