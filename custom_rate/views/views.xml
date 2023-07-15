@@ -8,7 +8,7 @@
          <xpath expr="//field[@name='l10n_latam_document_type_id']"  position="after">
              <field name="es_manual_rate" string="Cambiar TC manualmente"  attrs="{'invisible': [('currency_id', 'in', (19))]}"/>
              <field name="currency_rate" attrs="{'invisible': [('currency_id', 'in', (19))], 'readonly' : ['|','|',('es_manual_rate','=',False),('state','=','posted'),('state','=','cancel')]}" force_save="1" digits="[12,6]"/>
-             <button name="round_create" type="object" class="oe_link" string="Redondear" attrs="{'invisible': [('currency_id', 'in', (19))]}"/>
+             <button name="auto_update" type="object" class="oe_link" string="Actualizar TC manualmente" attrs="{'invisible': [('currency_id', 'in', (19))]}"/>
         </xpath>
       </field>
     </record>
