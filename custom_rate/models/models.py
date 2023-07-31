@@ -16,7 +16,6 @@
 #
 ##############################################################################
 from odoo import api, fields, models, SUPERUSER_ID
-import math
 
 
 class AccountMove(models.Model):
