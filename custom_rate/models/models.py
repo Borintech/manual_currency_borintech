@@ -25,6 +25,12 @@ class AccountMove(models.Model):
                                  store=True)
     es_manual_rate = fields.Boolean(string='Usar TC manual')
 
+    @api.constrains('currency_rate')
+    def change_l10n_ar_currency(self):
+        for rec in self:
+            if rec.es_manual_rate:
+                rec.l10n_ar_currency_rate = rec.currency_rate
+
     @api.depends('currency_id')
     def _get_currency_rate(self):
         for record in self:
