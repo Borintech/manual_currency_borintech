@@ -21,7 +21,7 @@
 
     'sequence': -2,
 
-    'version': '2.5.3',
+    'version': '4.2',
 
     # any module necessary for this one to work correctly
     'depends': [
